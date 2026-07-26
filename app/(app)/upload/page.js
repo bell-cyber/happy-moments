@@ -123,10 +123,19 @@ export default function UploadPage() {
     if (f.type.startsWith("video/")) {
       const duration = await getVideoDuration(f);
       if (duration > MAX_VIDEO_SECONDS) {
-        setTrimSource(f);
-        setTrimSourceUrl(URL.createObjectURL(f));
-        setTrimDuration(duration);
-        setTrimStart(0);
+        const canTrimHere =
+          typeof document.createElement("video").captureStream === "function";
+        if (canTrimHere) {
+          setTrimSource(f);
+          setTrimSourceUrl(URL.createObjectURL(f));
+          setTrimDuration(duration);
+          setTrimStart(0);
+        } else {
+          setMessage(
+            `영상이 ${MAX_VIDEO_SECONDS}초보다 길어요. 폰 사진 앱에서 ${MAX_VIDEO_SECONDS}초 이내로 자른 후 다시 선택해주세요.`
+          );
+        }
+        e.target.value = "";
         return;
       }
     }
@@ -250,6 +259,11 @@ export default function UploadPage() {
               src={trimSourceUrl}
               className="aspect-square w-full rounded-2xl bg-black object-contain"
               muted
+              playsInline
+              preload="auto"
+              onLoadedMetadata={(e) => {
+                e.target.currentTime = trimStart;
+              }}
             />
             <input
               type="range"
@@ -257,7 +271,13 @@ export default function UploadPage() {
               max={Math.max(trimDuration - MAX_VIDEO_SECONDS, 0)}
               step={0.1}
               value={trimStart}
-              onChange={(e) => setTrimStart(Number(e.target.value))}
+              onChange={(e) => {
+                const value = Number(e.target.value);
+                setTrimStart(value);
+                if (trimVideoRef.current) {
+                  trimVideoRef.current.currentTime = value;
+                }
+              }}
             />
             <p className="text-center text-xs text-[#6B5C53]">
               {trimStart.toFixed(1)}초 ~ {(trimStart + MAX_VIDEO_SECONDS).toFixed(1)}
