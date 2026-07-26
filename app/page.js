@@ -52,8 +52,13 @@ function CloverCursor({ x, y, visible }) {
 export default function SubmissionPage() {
   const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
   const [cursorVisible, setCursorVisible] = useState(false);
+  const [fineCursor, setFineCursor] = useState(false);
 
   useEffect(() => {
+    const isFine = window.matchMedia("(pointer: fine)").matches;
+    setFineCursor(isFine);
+    if (!isFine) return;
+
     function handleMove(e) {
       setCursorPos({ x: e.clientX, y: e.clientY });
       setCursorVisible(true);
@@ -206,23 +211,27 @@ export default function SubmissionPage() {
   if (status === "success") {
     return (
       <div
-        style={{ cursor: "none" }}
+        style={fineCursor ? { cursor: "none" } : undefined}
         className="flex flex-1 items-center justify-center px-4 py-16"
       >
         <div className="w-full max-w-md rounded-3xl border border-[#F0E2D3] bg-white p-8 text-center">
           <p className="text-base font-semibold text-[#3A2F2A]">{message}</p>
         </div>
-        <CloverCursor x={cursorPos.x} y={cursorPos.y} visible={cursorVisible} />
+        {fineCursor && (
+          <CloverCursor x={cursorPos.x} y={cursorPos.y} visible={cursorVisible} />
+        )}
       </div>
     );
   }
 
   return (
     <div
-      style={{ cursor: "none" }}
+      style={fineCursor ? { cursor: "none" } : undefined}
       className="flex flex-1 flex-col items-center px-4 py-16"
     >
-      <CloverCursor x={cursorPos.x} y={cursorPos.y} visible={cursorVisible} />
+      {fineCursor && (
+        <CloverCursor x={cursorPos.x} y={cursorPos.y} visible={cursorVisible} />
+      )}
       <div className="w-full max-w-md">
         <h1 className="text-center text-2xl font-semibold leading-snug text-[#3A2F2A]">
           행복한 순간을 함께 기록해 주세요
