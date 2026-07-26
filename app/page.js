@@ -252,9 +252,8 @@ export default function SubmissionPage() {
           </p>
           <p>
             소중한 기록은 &apos;Our Happy Moments&apos; 콘텐츠로 소개될
-            예정입니다.
+            예정입니다. 참여해주셔서 감사합니다.☘️
           </p>
-          <p>참여해주셔서 감사합니다.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="mt-10 flex flex-col gap-5">
