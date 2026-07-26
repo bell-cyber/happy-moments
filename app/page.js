@@ -1,7 +1,54 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+
+const MAX_VIDEO_SECONDS = 5;
+
+function getVideoDuration(file) {
+  return new Promise((resolve) => {
+    const v = document.createElement("video");
+    v.preload = "metadata";
+    v.onloadedmetadata = () => {
+      URL.revokeObjectURL(v.src);
+      resolve(v.duration);
+    };
+    v.src = URL.createObjectURL(file);
+  });
+}
+
+function trimVideo(videoEl, start, duration) {
+  return new Promise((resolve, reject) => {
+    if (typeof videoEl.captureStream !== "function") {
+      reject(new Error("trim-unsupported"));
+      return;
+    }
+    const stream = videoEl.captureStream();
+    const recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+    const chunks = [];
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunks.push(e.data);
+    };
+    recorder.onerror = reject;
+    recorder.onstop = () => {
+      videoEl.muted = false;
+      resolve(new Blob(chunks, { type: "video/webm" }));
+    };
+
+    videoEl.muted = true;
+    const onSeeked = () => {
+      videoEl.removeEventListener("seeked", onSeeked);
+      recorder.start();
+      videoEl.play();
+      setTimeout(() => {
+        videoEl.pause();
+        recorder.stop();
+      }, duration * 1000);
+    };
+    videoEl.addEventListener("seeked", onSeeked);
+    videoEl.currentTime = start;
+  });
+}
 
 const EMAIL_DOMAINS = [
   "gmail.com",
@@ -94,12 +141,16 @@ export default function SubmissionPage() {
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
 
+  const trimVideoRef = useRef(null);
+  const [trimTarget, setTrimTarget] = useState(null);
+  const [trimStart, setTrimStart] = useState(0);
+  const [trimming, setTrimming] = useState(false);
+
   function updateField(key, value) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  function handleSlotFileChange(index, e) {
-    const f = e.target.files?.[0] || null;
+  function setSlotFile(index, f) {
     setSlotFiles((prev) => prev.map((v, i) => (i === index ? f : v)));
     setSlotPreviews((prev) => {
       const next = [...prev];
@@ -107,6 +158,60 @@ export default function SubmissionPage() {
       next[index] = f ? URL.createObjectURL(f) : null;
       return next;
     });
+  }
+
+  async function handleSlotFileChange(index, e) {
+    const f = e.target.files?.[0] || null;
+    if (!f) return;
+
+    if (f.type.startsWith("video/")) {
+      const duration = await getVideoDuration(f);
+      if (duration > MAX_VIDEO_SECONDS) {
+        setTrimTarget({
+          index,
+          file: f,
+          url: URL.createObjectURL(f),
+          duration,
+        });
+        setTrimStart(0);
+        e.target.value = "";
+        return;
+      }
+    }
+
+    setSlotFile(index, f);
+  }
+
+  async function handleConfirmTrim() {
+    setTrimming(true);
+    try {
+      const blob = await trimVideo(
+        trimVideoRef.current,
+        trimStart,
+        MAX_VIDEO_SECONDS
+      );
+      const trimmedFile = new File(
+        [blob],
+        trimTarget.file.name.replace(/\.\w+$/, ".webm"),
+        { type: "video/webm", lastModified: trimTarget.file.lastModified }
+      );
+      setSlotFile(trimTarget.index, trimmedFile);
+      URL.revokeObjectURL(trimTarget.url);
+      setTrimTarget(null);
+    } catch {
+      alert(
+        "이 브라우저에서는 영상 자르기가 지원되지 않아요. 폰의 사진 앱에서 미리 잘라서 올려주세요."
+      );
+      URL.revokeObjectURL(trimTarget.url);
+      setTrimTarget(null);
+    } finally {
+      setTrimming(false);
+    }
+  }
+
+  function handleCancelTrim() {
+    URL.revokeObjectURL(trimTarget.url);
+    setTrimTarget(null);
   }
 
   function updateStory(index, value) {
@@ -421,6 +526,51 @@ export default function SubmissionPage() {
           )}
         </form>
       </div>
+
+      {trimTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-4">
+            <p className="mb-3 text-center text-sm font-semibold text-[#3A2F2A]">
+              영상이 {MAX_VIDEO_SECONDS}초보다 길어요. 올릴 구간을
+              선택해주세요
+            </p>
+            <video
+              ref={trimVideoRef}
+              src={trimTarget.url}
+              className="aspect-square w-full rounded-xl bg-black object-contain"
+              muted
+            />
+            <input
+              type="range"
+              min={0}
+              max={Math.max(trimTarget.duration - MAX_VIDEO_SECONDS, 0)}
+              step={0.1}
+              value={trimStart}
+              onChange={(e) => setTrimStart(Number(e.target.value))}
+              className="mt-3 w-full"
+            />
+            <p className="mt-1 text-center text-xs text-[#6B5C53]">
+              {trimStart.toFixed(1)}초 ~{" "}
+              {(trimStart + MAX_VIDEO_SECONDS).toFixed(1)}초 구간이 저장돼요
+            </p>
+            <button
+              type="button"
+              disabled={trimming}
+              onClick={handleConfirmTrim}
+              className="mt-3 h-11 w-full rounded-full bg-[#CCFF00] text-sm font-semibold text-[#24330F] transition hover:bg-[#B8E600] disabled:opacity-60"
+            >
+              {trimming ? "자르는 중..." : "이 구간으로 자르기"}
+            </button>
+            <button
+              type="button"
+              onClick={handleCancelTrim}
+              className="mt-2 h-9 w-full rounded-full border border-[#F0E2D3] text-xs text-[#6B5C53]"
+            >
+              취소
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
