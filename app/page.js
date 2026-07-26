@@ -263,13 +263,13 @@ export default function SubmissionPage() {
                 type="text"
                 value={emailId}
                 onChange={(e) => setEmailId(e.target.value)}
-                className="h-11 min-w-0 flex-1 rounded-xl border border-[#F0E2D3] bg-[#FFF8EF] px-4 text-sm text-[#3A2F2A] outline-none focus:border-[#CCFF00]"
+                className="h-11 min-w-0 flex-1 rounded-xl border border-[#F0E2D3] bg-white px-4 text-base text-[#3A2F2A] outline-none focus:border-[#CCFF00]"
               />
               <span className="text-sm text-[#6B5C53]">@</span>
               <select
                 value={emailDomain}
                 onChange={(e) => setEmailDomain(e.target.value)}
-                className="h-11 rounded-xl border border-[#F0E2D3] bg-[#FFF8EF] px-3 text-sm text-[#3A2F2A] outline-none focus:border-[#CCFF00]"
+                className="h-11 rounded-xl border border-[#F0E2D3] bg-white px-3 text-base text-[#3A2F2A] outline-none focus:border-[#CCFF00]"
               >
                 {EMAIL_DOMAINS.map((d) => (
                   <option key={d} value={d}>
@@ -284,7 +284,7 @@ export default function SubmissionPage() {
                 placeholder="도메인을 입력해주세요 (예: mycompany.com)"
                 value={emailDomainCustom}
                 onChange={(e) => setEmailDomainCustom(e.target.value)}
-                className="mt-2 h-11 w-full rounded-xl border border-[#F0E2D3] bg-[#FFF8EF] px-4 text-sm text-[#3A2F2A] outline-none focus:border-[#CCFF00]"
+                className="mt-2 h-11 w-full rounded-xl border border-[#F0E2D3] bg-white px-4 text-base text-[#3A2F2A] outline-none focus:border-[#CCFF00]"
               />
             )}
           </Field>
@@ -294,7 +294,7 @@ export default function SubmissionPage() {
               type="text"
               value={form.name}
               onChange={(e) => updateField("name", e.target.value)}
-              className="h-11 w-full rounded-xl border border-[#F0E2D3] bg-[#FFF8EF] px-4 text-sm text-[#3A2F2A] outline-none focus:border-[#CCFF00]"
+              className="h-11 w-full rounded-xl border border-[#F0E2D3] bg-white px-4 text-base text-[#3A2F2A] outline-none focus:border-[#CCFF00]"
             />
           </Field>
 
@@ -303,7 +303,7 @@ export default function SubmissionPage() {
               type="text"
               value={form.birthYear}
               onChange={(e) => updateField("birthYear", e.target.value)}
-              className="h-11 w-full rounded-xl border border-[#F0E2D3] bg-[#FFF8EF] px-4 text-sm text-[#3A2F2A] outline-none focus:border-[#CCFF00]"
+              className="h-11 w-full rounded-xl border border-[#F0E2D3] bg-white px-4 text-base text-[#3A2F2A] outline-none focus:border-[#CCFF00]"
             />
           </Field>
 
@@ -315,7 +315,7 @@ export default function SubmissionPage() {
               type="text"
               value={form.instagram}
               onChange={(e) => updateField("instagram", e.target.value)}
-              className="h-11 w-full rounded-xl border border-[#F0E2D3] bg-[#FFF8EF] px-4 text-sm text-[#3A2F2A] outline-none focus:border-[#CCFF00]"
+              className="h-11 w-full rounded-xl border border-[#F0E2D3] bg-white px-4 text-base text-[#3A2F2A] outline-none focus:border-[#CCFF00]"
             />
           </Field>
 
@@ -327,7 +327,7 @@ export default function SubmissionPage() {
               type="text"
               value={form.occupation}
               onChange={(e) => updateField("occupation", e.target.value)}
-              className="h-11 w-full rounded-xl border border-[#F0E2D3] bg-[#FFF8EF] px-4 text-sm text-[#3A2F2A] outline-none focus:border-[#CCFF00]"
+              className="h-11 w-full rounded-xl border border-[#F0E2D3] bg-white px-4 text-base text-[#3A2F2A] outline-none focus:border-[#CCFF00]"
             />
           </Field>
 
@@ -378,7 +378,7 @@ export default function SubmissionPage() {
                       placeholder="이 순간은 어떤 행복한 순간이였나요?"
                       value={stories[i]}
                       onChange={(e) => updateStory(i, e.target.value)}
-                      className="h-24 flex-1 rounded-xl border border-[#F0E2D3] bg-white px-3 pt-8 pb-2 text-center text-sm leading-tight text-[#3A2F2A] outline-none focus:border-[#CCFF00] placeholder:text-xs placeholder:leading-tight placeholder:text-[#B4A99C]"
+                      className="h-24 flex-1 rounded-xl border border-[#F0E2D3] bg-white px-3 pt-8 pb-2 text-center text-base leading-tight text-[#3A2F2A] outline-none focus:border-[#CCFF00] placeholder:text-xs placeholder:leading-tight placeholder:text-[#B4A99C]"
                     />
                   </div>
                 </div>
@@ -394,7 +394,7 @@ export default function SubmissionPage() {
               type="text"
               value={form.song}
               onChange={(e) => updateField("song", e.target.value)}
-              className="h-11 w-full rounded-xl border border-[#F0E2D3] bg-[#FFF8EF] px-4 text-sm text-[#3A2F2A] outline-none focus:border-[#CCFF00]"
+              className="h-11 w-full rounded-xl border border-[#F0E2D3] bg-white px-4 text-base text-[#3A2F2A] outline-none focus:border-[#CCFF00]"
             />
           </Field>
 
